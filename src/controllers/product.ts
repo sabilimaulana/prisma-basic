@@ -86,7 +86,20 @@ export const patchProduct = async (
   res: Response
 ): Promise<void> => {
   try {
-    successResponse(res, 200, [], 'Success');
+    const { id } = req.params;
+    const { name, categoryId, price, quantity } = req.body;
+
+    const product: Product | null = await prisma.product.update({
+      where: { id: +id },
+      include: { category: true },
+      data: { name, categoryId, price, quantity }
+    });
+
+    if (!product) {
+      return errorResponse(res, 404, product, 'Product Not Found');
+    }
+
+    successResponse(res, 200, product, 'Success');
   } catch (error) {
     errorResponse(res, 500, [], 'Internal Server Error');
   }
